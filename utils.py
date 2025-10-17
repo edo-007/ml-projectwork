@@ -241,7 +241,7 @@ def get_embeddings(args):
 
 
     print("\n")
-    print(Colors.BOLD + Colors.PURPLE + f"Avvio Grid Search per KNN..." + Colors.END)
+    print(Colors.BOLD + Colors.PURPLE + f"Avvio Grid Search per {args.model.upper()}..." + Colors.END)
     
     # return embeddings
     return embeddings 

@@ -112,7 +112,7 @@ def main(args):
     y_pred = best_clf.predict(embs['X_test'])
 
 
-    print("Distribuzione PREDIZIONE:")
+    print("Distribuzione PREDIZIONE (y_pred):")
     print({label: count for label, count in Counter(y_pred).items()})
 
     print("\n" + "="*50)
@@ -165,38 +165,37 @@ if __name__ == '__main__':
     )
     
     parser.add_argument(
-        "--seedsplit", "-splt", 
+        "--seedsamp", 
+        type=int,
+        default=-1, 
+        help="Seed per riproducibilità sampling delle istanze se nrow != all"
+    )
+    
+    parser.add_argument(
+        "--seedsplit", 
         type=int,
         default=DEF_SEED, 
         help="Seed per riproducibilità per lo split train/test"
     )
 
     parser.add_argument(
-        "--seedsamp", "-smp", 
-        type=int,
-        default=-1, 
-        help="Seed per riproducibilità sampling delle istanze"
-    )
-    
-    parser.add_argument(
-        "--strans", "-st", 
+        "--strans", 
         default="all-mpnet-base-v2",
         help="Modello SentenceTransformer da usare"
     )
 
     parser.add_argument(
-        "--model", "-m", 
+        "--model", 
         default="knn",
-        help="Modello SentenceTransformer da usare"
+        help="Modello di ML da usare"
     )
 
     parser.add_argument(
-        "--testsize", "-ts", 
+        "--testsize",
         type=float,
         default=0.20, 
-        help="Modello SentenceTransformer da usare"
+        help="dimensione del dataset di test "
     )
-
 
     args = parser.parse_args()
 
