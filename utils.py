@@ -224,7 +224,7 @@ def get_embeddings(args):
 
         
         # Generazione embedding
-        embeddings_file = f"{EMBEDDINGS_DIR}/{Path(args.data).stem}_seedsamp{args.seedsamp}_seedsplit{args.seedsplit}_nrows{args.nrows}.joblib"
+        embeddings_file = f"{EMBEDDINGS_DIR}/{Path(args.data).stem}_seedsamp-{args.seedsamp}_seedsplit-{args.seedsplit}_nrows-{args.nrows}.joblib"
         embeddings = compute_embeddings(
             X_train_txt, X_test_txt, y_train, y_test, 
             embeddings_file, model_name=args.strans
