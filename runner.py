@@ -127,13 +127,13 @@ def main(args):
     print("="*50)
     print(classification_report(embs['y_test'],  y_pred))
 
-    results = pd.DataFrame(grid.cv_results_)
-    metriche = [col for col in results.columns]
-    print(results[metriche])
+    # results = pd.DataFrame(grid.cv_results_)
+    # metriche = [col for col in results.columns]
+    # print(results[metriche])
 
     # Salvataggio modello migliore
-
-    model_filename = f"best_knn_{Path(args.data).stem}.joblib"
+    model_filename = f"models/{args.model}_nrows-{args.nrows}_refit-accuracy.joblib"
+    # model_filename = f"best__{Path(args.data).stem}.joblib"
     joblib.dump(best_clf, model_filename)
     print(f"\nModello salvato in: {model_filename}")
 
