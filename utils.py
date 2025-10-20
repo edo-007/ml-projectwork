@@ -23,6 +23,7 @@ class Colors:
 
 EMBEDDINGS_DIR = 'embeddings'
 
+    
 def compute_embeddings(train_texts, test_texts, y_train, y_test, embeddings_file, model_name='all-mpnet-base-v2'):
     """
     Genera gli embedding per train e test set e li salva insieme alle label.
