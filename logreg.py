@@ -1,7 +1,7 @@
 from utils import *
 
 import argparse
-from sklearn.svm import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, cohen_kappa_score, make_scorer
