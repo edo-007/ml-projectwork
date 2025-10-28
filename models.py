@@ -19,7 +19,6 @@ SCORING_METRICS = {
     'cohen_kappa': make_scorer(cohen_kappa_score)
 }
 
-
 # ============================================================================
 # LOGISTIC REGRESSION
 # ============================================================================
@@ -125,7 +124,7 @@ MODEL_REGISTRY = {
 # MAIN FUNCTION
 # ============================================================================
 
-def get_model_and_grid(model_name, refit_metric='accuracy', cv=5, verbose=1):
+def get_model_and_grid(model_name, refit_metric='accuracy', cv=5, verbose=0):
     """
     Restituisce un GridSearchCV configurato per il modello specificato.
     
