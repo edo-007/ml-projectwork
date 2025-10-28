@@ -157,7 +157,7 @@ def get_model_and_grid(model_name, refit_metric='accuracy', cv=5, verbose=0):
         scoring=SCORING_METRICS,
         refit=refit_metric,
         n_jobs=-1,
-        verbose=verbose
+        verbose=0
     )
     
     return grid

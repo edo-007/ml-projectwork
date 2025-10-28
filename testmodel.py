@@ -101,6 +101,7 @@ def parse_arguments():
         "--data", "-d",
         type=str,
         required=True,
+
         help="Percorso del dataset CSV (richiesto: colonne 'clean_text' e 'classificazione')"
     )
     
@@ -124,6 +125,7 @@ def parse_arguments():
         "--testsize",
         type=float,
         default=0.2,
+
         help="Proporzione del dataset da usare per il test set (0.0-1.0)"
     )
     
