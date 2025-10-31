@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script per eliminare tutti i file .joblib nelle cartelle embeddings/ e models/
+# Script per eliminare tutti i file .joblib nelle cartelle embeddings/ e results/
 
 # Colori per output
 RED='\033[0;31m'
@@ -15,7 +15,7 @@ echo -e "${BLUE}========================================${NC}"
 
 # Contatori
 count_embeddings=0
-count_models=0
+count_results=0
 total_size=0
 
 # Funzione per calcolare la dimensione totale
@@ -32,8 +32,8 @@ calculate_size() {
 # Calcola dimensione prima della pulizia
 echo -e "\n${YELLOW}Analisi in corso...${NC}"
 size_embeddings=$(calculate_size "embeddings")
-size_models=$(calculate_size "models")
-total_size=$((size_embeddings + size_models))
+size_results=$(calculate_size "results")
+total_size=$((size_embeddings + size_results))
 
 # Mostra cosa verrà eliminato
 if [ -d "embeddings" ]; then
@@ -44,15 +44,18 @@ if [ -d "embeddings" ]; then
     fi
 fi
 
-if [ -d "models" ]; then
-    count_models=$(find models -name "*.joblib" -type f 2>/dev/null | wc -l)
-    if [ $count_models -gt 0 ]; then
-        echo -e "\n${YELLOW}File in models/:${NC}"
-        find models -name "*.joblib" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
+if [ -d "results" ]; then
+    count_results=$(find results -type f \( -name "*.json" -o -name "*.csv" \)  2>/dev/null | wc -l)
+    if [ $count_results -gt 0 ]; then
+        echo -e "\n${YELLOW}File in results/:${NC}"
+        find results -name "*.json" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
+        find results -name "*.csv" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
     fi
 fi
 
-total_files=$((count_embeddings + count_models))
+
+
+total_files=$((count_embeddings + count_results))
 
 # Se non ci sono file da eliminare
 if [ $total_files -eq 0 ]; then
@@ -63,7 +66,7 @@ fi
 # Mostra riepilogo
 echo -e "\n${YELLOW}Riepilogo:${NC}"
 echo -e "  File in embeddings/: ${count_embeddings}"
-echo -e "  File in models/:     ${count_models}"
+echo -e "  File in results/:     ${count_results}"
 echo -e "  Totale file:         ${total_files}"
 if [ $total_size -gt 0 ]; then
     size_mb=$(echo "scale=2; $total_size / 1048576" | bc)
@@ -83,10 +86,11 @@ if [[ $confirm == [sS] || $confirm == [sS][iI] ]]; then
         echo -e "${GREEN}✓ Eliminati $count_embeddings file da embeddings/${NC}"
     fi
     
-    # Elimina file da models/
-    if [ -d "models" ] && [ $count_models -gt 0 ]; then
-        find models -name "*.joblib" -type f -delete
-        echo -e "${GREEN}✓ Eliminati $count_models file da models/${NC}"
+    # Elimina file da results/
+    if [ -d "results" ] && [ $count_results -gt 0 ]; then
+        find results -name "*.json" -type f -delete
+        find results -name "*.csv" -type f -delete
+        echo -e "${GREEN}✓ Eliminati $count_results file da results/${NC}"
     fi
     
     echo -e "\n${GREEN}Pulizia completata con successo!${NC}"

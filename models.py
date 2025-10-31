@@ -34,8 +34,8 @@ def get_logreg_config():
     
     param_grid = {
         'C': [0.01, 0.1, 1, 10, 100],
-        'solver': ['lbfgs', 'saga'],
-        'penalty': ['l2']
+        # 'solver': ['lbfgs', 'saga'],
+        # 'penalty': ['l2']
     }
     
     return estimator, param_grid
@@ -56,8 +56,8 @@ def get_svm_config():
     
     param_grid = {
         'C': [0.1, 1, 10, 100],
-        'kernel': ['linear', 'rbf'],
-        'gamma': ['scale', 'auto']
+        # 'kernel': ['linear', 'rbf'],
+        # 'gamma': ['scale', 'auto']
     }
     
     return estimator, param_grid
@@ -77,10 +77,10 @@ def get_rf_config():
     estimator = RandomForestClassifier(random_state=42, n_jobs=-1)
     
     param_grid = {
-        'n_estimators': [100, 200, 300],
-        'max_depth': [10, 20, 30, None],
+        # 'n_estimators': [100, 200, 300],
+        # 'max_depth': [10, 20, 30, None],
         'min_samples_split': [2, 5, 10],
-        'min_samples_leaf': [1, 2, 4]
+        # 'min_samples_leaf': [1, 2, 4]
     }
     
     return estimator, param_grid
@@ -101,8 +101,8 @@ def get_knn_config():
     
     param_grid = {
         'n_neighbors': [3, 5, 7, 9, 11],
-        'weights': ['uniform', 'distance'],
-        'metric': ['euclidean', 'manhattan', 'cosine']
+        # 'weights': ['uniform', 'distance'],
+        # 'metric': ['euclidean', 'manhattan', 'cosine']
     }
     
     return estimator, param_grid
@@ -110,13 +110,15 @@ def get_knn_config():
 
 # ============================================================================
 # MODEL REGISTRY
+# 
+# Associate each model (a tuple) with its corresponding estimator 
+# and a grid for searching hyperparameters.
 # ============================================================================
-
 MODEL_REGISTRY = {
     'logreg': get_logreg_config,
     'svm': get_svm_config,
-    'rf': get_rf_config,
-    'knn': get_knn_config
+    # 'rf': get_rf_config,
+    # 'knn': get_knn_config
 }
 
 
@@ -145,8 +147,6 @@ def get_model_and_grid(model_name, refit_metric='accuracy', cv=5, verbose=0):
             f"Modello '{model_name}' non riconosciuto. "
             f"Modelli disponibili: {list(MODEL_REGISTRY.keys())}"
         )
-    
-    # Ottieni estimator e param_grid
     estimator, param_grid = MODEL_REGISTRY[model_name]()
     
     # Crea GridSearchCV

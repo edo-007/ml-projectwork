@@ -222,8 +222,6 @@ def get_embeddings(args):
     # Preparazione dati
     X = df['clean_text'].astype(str).tolist()
     y = df['classificazione']
-    
-    # input()
 
     # Split train/test stratificato
     X_train_txt, X_test_txt, y_train, y_test = train_test_split(
