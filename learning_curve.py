@@ -141,7 +141,7 @@ def compute_learning_curves(X_train, y_train, X_test, y_test,
     
     # Itero su tutti i modelli passati #########################################################################
     ##############################################################################################################
-    for model_name in models_to_test:
+    for model_name in models_to_tssh eponsanesi@10.80.1.25est:
         print(f"\n{Colors.BOLD}{Colors.BLUE}Modello: {model_name.upper()}{Colors.END}")
         print("-"*80)
         
@@ -218,7 +218,6 @@ def plot_learning_curves(results, relative_train_sizes, output_dir='results'):
                    label=model_name.upper(), markersize=8)
         
         ax.set_xlabel('% TrainingSet', fontsize=12, fontweight='bold')
-        # ax.set_ylabel(metric_labels[metric], fontsize=12, fontweight='bold')
         ax.set_title(f'Learning Curve - {metric_labels[metric]}', fontsize=14, fontweight='bold')
         ax.legend(fontsize=7)
         ax.grid(True, alpha=0.3)

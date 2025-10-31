@@ -53,7 +53,7 @@ def get_svm_config():
     Returns:
         tuple: (estimator, param_grid)
     """
-    estimator = SVC(random_state=42)
+    estimator = LinearSVC(random_state=42)
     
     param_grid = {
         'C': [0.1, 1, 10, 100],
@@ -147,7 +147,7 @@ def get_parametrized_estimator(model_name):
             max_iter = 20000
         ),
 
-        'rf': DecisionTreeClassifier(
+        'rf': DecisionTreeClassifierer(
             criterion='entropy',
             max_depth=10,
             min_samples_split=20,
