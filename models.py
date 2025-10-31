@@ -3,9 +3,10 @@ Definizione dei modelli e delle relative griglie di iperparametri per la grid se
 """
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import LinearSVC
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, cohen_kappa_score
 
@@ -34,8 +35,8 @@ def get_logreg_config():
     
     param_grid = {
         'C': [0.01, 0.1, 1, 10, 100],
-        # 'solver': ['lbfgs', 'saga'],
-        # 'penalty': ['l2']
+        'solver': ['lbfgs', 'saga'],
+        'penalty': ['l2']
     }
     
     return estimator, param_grid
@@ -56,8 +57,8 @@ def get_svm_config():
     
     param_grid = {
         'C': [0.1, 1, 10, 100],
-        # 'kernel': ['linear', 'rbf'],
-        # 'gamma': ['scale', 'auto']
+        'kernel': ['linear', 'rbf'],
+        'gamma': ['scale', 'auto']
     }
     
     return estimator, param_grid
@@ -77,10 +78,10 @@ def get_rf_config():
     estimator = RandomForestClassifier(random_state=42, n_jobs=-1)
     
     param_grid = {
-        # 'n_estimators': [100, 200, 300],
-        # 'max_depth': [10, 20, 30, None],
+        'n_estimators': [100, 200, 300],
+        'max_depth': [10, 20, 30, None],
         'min_samples_split': [2, 5, 10],
-        # 'min_samples_leaf': [1, 2, 4]
+        'min_samples_leaf': [1, 2, 4]
     }
     
     return estimator, param_grid
@@ -101,8 +102,8 @@ def get_knn_config():
     
     param_grid = {
         'n_neighbors': [3, 5, 7, 9, 11],
-        # 'weights': ['uniform', 'distance'],
-        # 'metric': ['euclidean', 'manhattan', 'cosine']
+        'weights': ['uniform', 'distance'],
+        'metric': ['euclidean', 'manhattan', 'cosine']
     }
     
     return estimator, param_grid
@@ -120,6 +121,47 @@ MODEL_REGISTRY = {
     # 'rf': get_rf_config,
     # 'knn': get_knn_config
 }
+
+
+def get_parametrized_estimator(model_name):
+    '''
+        return parametrized estimator with best parametrization
+    '''
+    estimators = {
+        
+        'logreg': LogisticRegression(
+            C = 10, 
+            solver='saga',
+            penalty='l1',
+            class_weight=None,
+            tol = 1e-3,
+            max_iter=100, 
+        ),
+
+        'svm': LinearSVC(
+            C = 10, 
+            penalty = 'l2',
+            loss = 'hinge',
+            class_weight=None,
+            tol = 1e-3,
+            max_iter = 20000
+        ),
+
+        'rf': DecisionTreeClassifier(
+            criterion='entropy',
+            max_depth=10,
+            min_samples_split=20,
+            min_samples_leaf=20
+        ),
+
+        'knn':  KNeighborsClassifier(
+            n_neighbors=5,
+            weights='distance',
+            metric='euclidean'
+        )
+    }
+    return estimators[model_name]
+
 
 
 # ============================================================================

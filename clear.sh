@@ -36,7 +36,7 @@ size_results=$(calculate_size "results")
 total_size=$((size_embeddings + size_results))
 
 # Mostra cosa verrà eliminato
-if [ -d "embeddings" ]; then
+if [ -d "embeddings" ] && [ "$1" != "--ee" ]; then
     count_embeddings=$(find embeddings -name "*.joblib" -type f 2>/dev/null | wc -l)
     if [ $count_embeddings -gt 0 ]; then
         echo -e "\n${YELLOW}File in embeddings/:${NC}"

@@ -36,12 +36,13 @@ import json
 from datetime import datetime
 
 from utils import get_embeddings, Colors, load_dataset
-from models import get_model_and_grid, MODEL_REGISTRY
+from models import get_model_and_grid, get_parametrized_estimator, MODEL_REGISTRY
 
 # Configurazione stile grafici
 sns.set_style("whitegrid")
 plt.rcParams['figure.figsize'] = (14, 10)
 
+MIN_INSTANCES = 20
 
 def train_and_evaluate(
         X_train_subset, 
@@ -57,7 +58,7 @@ def train_and_evaluate(
     Args:
         X_train_subset: Subset del training set
         y_train_subset: Label del subset
-        X_test: Test set completo
+        X_test: Test set completoritrovo 
         y_test: Label del test set
         model_name: Nome del modello
         refit: Metrica per la grid search
@@ -66,18 +67,21 @@ def train_and_evaluate(
         dict: Metriche di performance
     """
     try:
-        # Ottieni grid search con CV ridotta per velocità
-        grid = get_model_and_grid(model_name, refit_metric=refit, cv=3, verbose=0)
+
+        # # Ottieni grid search con CV ridotta per velocità
+            # grid = get_model_and_grid(model_name, refit_metric=refit, cv=3, verbose=0)
+            # grid.fit(X_train_subset, y_train_subset)
+            # y_pred = grid.best_estimator_.predict(X_test)
         
-        grid.fit(X_train_subset, y_train_subset)
-        
-        y_pred = grid.best_estimator_.predict(X_test)
-        
+        estimator = get_parametrized_estimator(model_name)
+        estimator.fit(X_train_subset, y_train_subset)
+        y_pred = estimator.predict(X_test)
+
         metrics = {
             'accuracy': accuracy_score(y_test, y_pred),
             'f1_macro': f1_score(y_test, y_pred, average='macro'),
             'cohen_kappa': cohen_kappa_score(y_test, y_pred),
-            'best_params': grid.best_params_
+            # 'best_params': grid.best_params_
         }
         
         return metrics
@@ -94,7 +98,7 @@ def _subset_indices(indices, train_size):
 
 
 def compute_learning_curves(X_train, y_train, X_test, y_test, 
-                           models_to_test, train_sizes, refit='accuracy'):
+            models_to_test, relative_train_sizes, refit='accuracy'):
     """
     Calcola le learning curves per tutti i modelli specificati.
     
@@ -116,24 +120,24 @@ def compute_learning_curves(X_train, y_train, X_test, y_test,
     # Lv2 - Quando accedi ad una key che non esiste crea una lista vuota per quella key
     results = defaultdict(lambda: defaultdict(list))
     
-    total_samples = len(X_train)
-    print(f"\n{Colors.BOLD}Totale campioni training: {total_samples}{Colors.END}")
+    total_train_size = len(X_train)
+    print(f"\n{Colors.BOLD}Totale campioni training: {total_train_size}{Colors.END}")
     print(f"{Colors.BOLD}Totale campioni test: {len(X_test)}{Colors.END}\n")
     
-    # Converti train_sizes da percentuali a numeri assoluti
-    absolute_sizes = [int(size_percent * total_samples) for size_percent in train_sizes]
-
-    # Validità dimensioni
-    # Rimuovi duplicati e ordina 
-    absolute_sizes = [min(size, total_samples) for size in absolute_sizes]
-    absolute_sizes = sorted(set(absolute_sizes))
-    
-    print(f"{Colors.CYAN}Dimensioni training set da testare: {absolute_sizes}{Colors.END}\n")
+    print(f"{Colors.CYAN}Dimensioni training set da testare: {relative_train_sizes}{Colors.END}\n")
     print("="*80)
     
-    total_iterations = len(models_to_test) * len(absolute_sizes)
 
-    current_iteration = 0
+    # TODO: Aggiungere controllo sull percentuali passate (comprese in [0,1])
+    _train_sizes = [
+        {
+            "rel": frac,
+            "abs": int(total_train_size * frac)
+        }
+        for i, frac in enumerate(sorted(set(relative_train_sizes)))
+    ]
+    total_iterations = len(models_to_test) * len(_train_sizes)
+
     
     # Itero su tutti i modelli passati #########################################################################
     ##############################################################################################################
@@ -143,18 +147,18 @@ def compute_learning_curves(X_train, y_train, X_test, y_test,
         
         # Itero su tutti le dimensioni dei TrainSet ################################################################
         ##############################################################################################################
-        for current_i, train_size in enumerate(absolute_sizes):
+        for current_i, size in enumerate(_train_sizes):
 
-            if train_size < 20:
+            if size['abs'] < MIN_INSTANCES:
                 continue
 
             indices = np.arange(len(X_train))
-            subset_indices = _subset_indices(indices, train_size)
+            subset_indices = _subset_indices(indices, size['abs'])
 
             X_train_subset = X_train[subset_indices]
             y_train_subset = y_train[subset_indices]
             
-            print(f"[{current_i}/{total_iterations}] Training con {train_size:>5} istanze... ", end='', flush=True)
+            print(f"[{current_i}/{total_iterations}] Training con {size['rel']*100:>5}% istanze... ", end='', flush=True)
             
             # Training e valutazione
             metrics = train_and_evaluate(
@@ -164,11 +168,11 @@ def compute_learning_curves(X_train, y_train, X_test, y_test,
             )
             
             if metrics:
-                results[model_name]['train_sizes'].append(train_size)
+                results[model_name]['train_sizes'].append(size['rel'])
                 results[model_name]['accuracy'].append(metrics['accuracy'])
                 results[model_name]['f1_macro'].append(metrics['f1_macro'])
                 results[model_name]['cohen_kappa'].append(metrics['cohen_kappa'])
-                results[model_name]['best_params'].append(metrics['best_params'])
+                # results[model_name]['best_params'].append(metrics['best_params'])
                 
                 print(f"{Colors.GREEN}✓ Accuracy: {metrics['accuracy']:.4f}{Colors.END}")
             else:
@@ -178,7 +182,7 @@ def compute_learning_curves(X_train, y_train, X_test, y_test,
     return dict(results)
 
 
-def plot_learning_curves(results, output_dir='results'):
+def plot_learning_curves(results, relative_train_sizes, output_dir='results'):
     """
     Crea grafici delle learning curves per tutti i modelli.
     
@@ -195,7 +199,7 @@ def plot_learning_curves(results, output_dir='results'):
         'cohen_kappa': "Cohen's Kappa"
     }
     
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    _, axes = plt.subplots(2, 2, figsize=(16, 12))
     axes = axes.flatten()
     
     # Plot per ogni metrica
@@ -206,46 +210,22 @@ def plot_learning_curves(results, output_dir='results'):
             train_sizes = model_results['train_sizes']
             scores = model_results[metric]
             
-            # print(train_sizes)
-            # print(scores)
-            # exit(0)
+            sizes = relative_train_sizes
+            if len(relative_train_sizes) != len(train_sizes):
+                sizes = train_sizes
 
-
-            ax.plot(train_sizes, scores, marker='o', linewidth=2, 
+            ax.plot(sizes, scores, marker='o', linewidth=2, 
                    label=model_name.upper(), markersize=8)
         
-        ax.set_xlabel('Numero di istanze in training', fontsize=12, fontweight='bold')
-        ax.set_ylabel(metric_labels[metric], fontsize=12, fontweight='bold')
+        ax.set_xlabel('% TrainingSet', fontsize=12, fontweight='bold')
+        # ax.set_ylabel(metric_labels[metric], fontsize=12, fontweight='bold')
         ax.set_title(f'Learning Curve - {metric_labels[metric]}', fontsize=14, fontweight='bold')
-        ax.legend(fontsize=10)
+        ax.legend(fontsize=7)
         ax.grid(True, alpha=0.3)
     
     # Tabella riassuntiva nel quarto subplot
     ax = axes[3]
     ax.axis('off')
-    
-    # Trova il miglior modello per ogni metrica con poche istanze
-    summary_text = f"{Colors.BOLD}RIEPILOGO - Migliori modelli con poche istanze{Colors.END}\n\n"
-    
-    for metric in metrics:
-        # Prendi i risultati con il minor numero di istanze
-        min_instances = min(results[model]['train_sizes'][0] for model in results)
-        
-        best_model = None
-        best_score = -1
-        
-        for model_name, model_results in results.items():
-            if model_results['train_sizes'][0] == min_instances:
-                score = model_results[metric][0]
-                if score > best_score:
-                    best_score = score
-                    best_model = model_name
-        
-        summary_text += f"{metric_labels[metric]}: {best_model.upper()} ({best_score:.4f})\n"
-    
-    ax.text(0.1, 0.5, summary_text, transform=ax.transAxes, 
-           fontsize=12, verticalalignment='center',
-           bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
     
     plt.tight_layout()
     
@@ -297,38 +277,40 @@ def create_comparison_table(results, output_dir='results'):
     return df
 
 
-def find_best_model_per_size(results):
-    """
-    Identifica il miglior modello per ogni dimensione del training set.
-    
-    Args:
-        results: Dizionario con i risultati
-    """
-    print(f"\n{Colors.BOLD}{Colors.CYAN}ANALISI: Miglior modello per ogni dimensione{Colors.END}")
-    print("="*100)
-    
-    # Raggruppa per dimensione
-    all_sizes = set()
-    for model_results in results.values():
-        all_sizes.update(model_results['train_sizes'])
-    
-    for size in sorted(all_sizes):
-        print(f"\n{Colors.BOLD}Training Size: {size} istanze{Colors.END}")
-        
-        for metric in ['accuracy', 'f1_macro', 'cohen_kappa']:
-            best_model = None
-            best_score = -1
-            
-            for model_name, model_results in results.items():
-                if size in model_results['train_sizes']:
-                    idx = model_results['train_sizes'].index(size)
-                    score = model_results[metric][idx]
-                    
-                    if score > best_score:
-                        best_score = score
-                        best_model = model_name
-            
-            print(f"  {metric:>15}: {best_model.upper():<10} ({best_score:.4f})")
+# def find_best_model_per_size(results):
+#     """
+#     Identifica il miglior modello per ogni dimensione del training set.
+#     Se hai testato più modelli su diversi set di addestramento (con dimensioni diverse), 
+#     questa funzione ti dice quale modello è il migliore per ogni dimensione, separatamente per ciascuna metrica.
+#
+#     Args:
+#         results: Dizionario con i risultati
+#     """
+#     print(f"\n{Colors.BOLD}{Colors.CYAN}ANALISI: Miglior modello per ogni dimensione{Colors.END}")
+#     print("="*100)
+#
+#     # Raggruppa per dimensione
+#     all_sizes = set()
+#     for model_results in results.values():
+#         all_sizes.update(model_results['train_sizes'])
+#
+#     for size in sorted(all_sizes):
+#         print(f"\n{Colors.BOLD}Training Size: {size} istanze{Colors.END}")
+#
+#         for metric in ['accuracy', 'f1_macro', 'cohen_kappa']:
+#             best_model = None
+#             best_score = -1
+#
+#             for model_name, model_results in results.items():
+#                 if size in model_results['train_sizes']:
+#                     idx = model_results['train_sizes'].index(size)
+#                     score = model_results[metric][idx]
+#
+#                     if score > best_score:
+#                         best_score = score
+#                         best_model = model_name
+#
+#             print(f"  {metric:>15}: {best_model.upper():<10} ({best_score:.4f})")
 
 
 def save_results_json(results, output_dir='results'):
@@ -352,7 +334,7 @@ def save_results_json(results, output_dir='results'):
             'accuracy': model_results['accuracy'],
             'f1_macro': model_results['f1_macro'],
             'cohen_kappa': model_results['cohen_kappa'],
-            'best_params': [str(params) for params in model_results['best_params']]
+            # 'best_params': [str(params) for params in model_results['best_params']]
         }
     
     with open(json_file, 'w') as f:
@@ -390,8 +372,8 @@ def parse_arguments():
         "--train-sizes", "-t",
         nargs='+',
         type=float,
-        # default=[0.1, 0.2, 0.3, 0.5, 0.7, 1.0],
-        default=[0.5, 0.7],
+        default=[0.1, 0.2, 0.3, 0.5, 0.7, 1.0],
+        # default=[0.5, 0.7],
         help="Dimensioni del training set (percentuali 0-1 o numeri assoluti)"
     )
     
@@ -451,11 +433,12 @@ def main():
         
         # Carica embeddings
         embs = get_embeddings(args)
-        
+
         # Calcola learning curves
         results = compute_learning_curves(
+
             embs['X_train'], embs['y_train'],
-            embs['X_test'], embs['y_test'],
+            embs['X_test'],  embs['y_test'],
             args.models,
             args.train_sizes,
             args.refit
@@ -465,17 +448,15 @@ def main():
         Path(args.output_dir).mkdir(exist_ok=True)
         
         # Analisi risultati
-        find_best_model_per_size(results)
-        
+        # find_best_model_per_size(results)
         # Crea tabella comparativa
-        df_comparison = create_comparison_table(results, args.output_dir)
-        
+        # df_comparison = create_comparison_table(results, args.output_dir)
         # Salva risultati JSON
-        save_results_json(results, args.output_dir)
+        # save_results_json(results, args.output_dir)
         
         # Genera grafici
         if not args.no_plot:
-            plot_learning_curves(results, args.output_dir)
+            plot_learning_curves(results, args.train_sizes, args.output_dir) 
         
         print(f"\n{Colors.BOLD}{Colors.GREEN}Analisi completata con successo!{Colors.END}")
         print(f"{Colors.GREEN}Risultati salvati in: {args.output_dir}/{Colors.END}\n")
