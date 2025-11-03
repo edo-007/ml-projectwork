@@ -167,12 +167,38 @@ Il dataset deve essere un file CSV con **almeno** le seguenti colonne:
 | `clean_text` | string | Testo preprocessato da classificare |
 | `classificazione` | string/int | Etichetta della classe |
 
-### Esempio di Dataset
+<!-- ### Esempio di Dataset -->
+<!---->
+<!-- ```csv -->
+<!-- clean_text,classificazione -->
+<!-- "questo è un esempio di testo positivo",positivo -->
+<!-- "questo è un esempio di testo negativo",negativo -->
+<!-- "testo neutro di esempio",neutro -->
+<!-- ``` -->
+## Output e Risultati
 
-```csv
-clean_text,classificazione
-"questo è un esempio di testo positivo",positivo
-"questo è un esempio di testo negativo",negativo
-"testo neutro di esempio",neutro
+### Embeddings
+
+Gli embeddings vengono salvati in `embeddings/` con il formato:
+
+```
+embeddings/
+└── <nome_dataset>.joblib
 ```
 
+Contenuto del file:
+```python
+{
+    'X_train': ndarray,  # Shape: (n_samples_train, 768)
+    'X_test': ndarray,   # Shape: (n_samples_test, 768)
+    'y_train': ndarray,  # Shape: (n_samples_train,)
+    'y_test': ndarray,   # Shape: (n_samples_test,)
+    'metadata': {
+        'model': 'all-mpnet-base-v2',
+        'train_shape': (4000, 768),
+        'test_shape': (1000, 768),
+        'class_distribution_train': {...},
+        'class_distribution_test': {...}
+    }
+}
+```
