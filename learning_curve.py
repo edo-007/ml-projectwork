@@ -10,7 +10,10 @@ python learning_curve.py --data dataset.csv
 python learning_curve.py --data dataset.csv --models logreg svm
 
 # Dimensioni custom (percentuali)
-python learning_curve.py --data dataset.csv --train-sizes 0.05 0.1 0.2 0.5 1.0
+
+MODELS=('logreg', 'svm', 'dt', 'knn')
+TRAIN_SIZES=(0.05 0.1 0.2 0.5 1.0)
+python learning_curve.py --data dataset.csv --train-sizes "${TRAIN_SIZES[@]}"
 
 # Dimensioni assolute
 python learning_curve.py --data dataset.csv --train-sizes 100 500 1000 5000
@@ -205,6 +208,7 @@ def plot_learning_curves(results, relative_train_sizes, output_dir='results'):
     # Plot per ogni metrica
     for idx, metric in enumerate(metrics):
         ax = axes[idx]
+        # ax.set_xscale('log')
         
         for model_name, model_results in results.items():
             train_sizes = model_results['train_sizes']
@@ -362,7 +366,7 @@ def parse_arguments():
     parser.add_argument(
         "--models", "-m",
         nargs='+',
-        # default=['logreg', 'svm', 'rf', 'knn'],
+        # default=['logreg', 'svm', 'dt', 'knn'],
         default=['logreg', 'svm'],
         choices=list(MODEL_REGISTRY.keys()),
         help="Modelli da confrontare (spazio-separati)"
