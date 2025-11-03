@@ -118,3 +118,61 @@ python testmodel.py --data data/dataset.csv \
     --seedsplit 42
 ```
 
+---
+
+### Analisi Learning Curves
+
+Il file `learning_curve.py` analizza come le performance variano al crescere del training set.
+
+#### Parametri Disponibili
+
+```bash
+python learning_curve.py \
+    --data <percorso_dataset.csv>           # OBBLIGATORIO: dataset CSV
+    --models <logreg svm dt knn>            # Modelli da confrontare (default: logreg svm)
+    --train-sizes <0.1 0.2 ... 1.0>         # Dimensioni training set (default: varie)
+    --refit <accuracy|f1_macro|cohen_kappa> # Metrica ottimizzazione (default: accuracy)
+    --testsize <0.0-1.0>                    # Proporzione test set (default: 0.2)
+    --seedsplit <int>                       # Seed per riproducibilità (default: 42)
+    --output-dir <directory>                # Directory output (default: results)
+    --no-plot                               # Non generare grafici
+```
+#### Esempio Base
+
+```bash
+# Confronto di tutti i modelli di default (logreg, svm)
+python learning_curve.py --data dataset.csv
+```
+
+#### Esempio con Dimensioni Custom
+
+```bash
+# Test su dimensioni specifiche del training set (percentuali)
+python learning_curve.py \
+    --data dataset.csv \
+    --models logreg svm \
+    --train-sizes 0.1 0.2 0.3 0.5 0.7 1.0
+```
+Utilizzare `--no-plot` per il report senza generazione dei grafici
+
+
+## Dataset
+
+### Formato Richiesto
+
+Il dataset deve essere un file CSV con **almeno** le seguenti colonne:
+
+| Colonna | Tipo | Descrizione |
+|---------|------|-------------|
+| `clean_text` | string | Testo preprocessato da classificare |
+| `classificazione` | string/int | Etichetta della classe |
+
+### Esempio di Dataset
+
+```csv
+clean_text,classificazione
+"questo è un esempio di testo positivo",positivo
+"questo è un esempio di testo negativo",negativo
+"testo neutro di esempio",neutro
+```
+
