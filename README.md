@@ -53,7 +53,7 @@ cd ml-projectwork
 pip install -r requirements.txt
 
 # Crea le directory necessarie (opzionale, vengono create automaticamente)
-mkdir -p embeddings models results
+mkdir -p data/{embeddings,models,results}
 ```
 
 ---
