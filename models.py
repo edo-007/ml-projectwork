@@ -118,8 +118,8 @@ def get_knn_config():
 MODEL_REGISTRY = {
     'logreg': get_logreg_config,
     'svm': get_svm_config,
-    # 'rf': get_rf_config,
-    # 'knn': get_knn_config
+    'dt': get_rf_config,
+    'knn': get_knn_config
 }
 
 
@@ -147,7 +147,7 @@ def get_parametrized_estimator(model_name):
             max_iter = 20000
         ),
 
-        'rf': DecisionTreeClassifierer(
+        'dt': DecisionTreeClassifier(
             criterion='entropy',
             max_depth=10,
             min_samples_split=20,
@@ -173,7 +173,7 @@ def get_model_and_grid(model_name, refit_metric='accuracy', cv=5, verbose=0):
     Restituisce un GridSearchCV configurato per il modello specificato.
     
     Args:
-        model_name (str): Nome del modello ('logreg', 'svm', 'rf', 'knn')
+        model_name (str): Nome del modello ('logreg', 'svm', 'dt', 'knn')
         refit_metric (str): Metrica da usare per selezionare il miglior modello
         cv (int): Numero di fold per la cross-validation
         verbose (int): Livello di verbosità
