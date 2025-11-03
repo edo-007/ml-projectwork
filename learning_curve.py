@@ -185,12 +185,67 @@ def compute_learning_curves(X_train, y_train, X_test, y_test,
     return dict(results)
 
 
+# def lot_learning_curves(results, relative_train_sizes, output_dir='results'):
+#     """
+#     Crea grafici delle learning curves per tutti i modelli.
+#
+#     Args:
+#         results: Dizionario con i risultati
+#         output_dir: Directory dove salvare i grafici
+#     """
+#     Path(output_dir).mkdir(exist_ok=True)
+#
+#     metrics = ['accuracy', 'f1_macro', 'cohen_kappa']
+#     metric_labels = {
+#         'accuracy': 'Accuracy',
+#         'f1_macro': 'F1 Score (Macro)',
+#         'cohen_kappa': "Cohen's Kappa"
+#     }
+#
+#     _, axes = plt.subplots(2, 2, figsize=(16, 12))
+#     axes = axes.flatten()
+#
+#     # Plot per ogni metrica
+#     for idx, metric in enumerate(metrics):
+#         ax = axes[idx]
+#         # ax.set_xscale('log')
+#
+#         for model_name, model_results in results.items():
+#             train_sizes = model_results['train_sizes']
+#             scores = model_results[metric]
+#
+#             sizes = relative_train_sizes
+#             if len(relative_train_sizes) != len(train_sizes):
+#                 sizes = train_sizes
+#
+#             ax.plot(sizes, scores, marker='o', linewidth=2, 
+#                    label=model_name.upper(), markersize=8)
+#
+#         ax.set_xlabel('% TrainingSet', fontsize=12, fontweight='bold')
+#         ax.set_title(f'Learning Curve - {metric_labels[metric]}', fontsize=14, fontweight='bold')
+#         ax.legend(fontsize=7)
+#         ax.grid(True, alpha=0.3)
+#
+#     # Tabella riassuntiva nel quarto subplot
+#     ax = axes[3]
+#     ax.axis('off')
+#
+#     plt.tight_layout()
+#
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     output_file = f"{output_dir}/learning_curves_{timestamp}.png"
+#     plt.savefig(output_file, dpi=300, bbox_inches='tight')
+#     print(f"\n{Colors.GREEN}Grafico salvato in: {output_file}{Colors.END}")
+#
+#     plt.close()
+
 def plot_learning_curves(results, relative_train_sizes, output_dir='results'):
     """
-    Crea grafici delle learning curves per tutti i modelli.
-    
+    Crea un grafico separato delle learning curves per ogni metrica.
+
     Args:
         results: Dizionario con i risultati
+        relative_train_sizes: Lista delle dimensioni relative del training set
         output_dir: Directory dove salvare i grafici
     """
     Path(output_dir).mkdir(exist_ok=True)
@@ -202,43 +257,33 @@ def plot_learning_curves(results, relative_train_sizes, output_dir='results'):
         'cohen_kappa': "Cohen's Kappa"
     }
     
-    _, axes = plt.subplots(2, 2, figsize=(16, 12))
-    axes = axes.flatten()
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # Plot per ogni metrica
-    for idx, metric in enumerate(metrics):
-        ax = axes[idx]
-        # ax.set_xscale('log')
+    for metric in metrics:
+        plt.figure(figsize=(8, 6))
         
         for model_name, model_results in results.items():
             train_sizes = model_results['train_sizes']
             scores = model_results[metric]
-            
+
             sizes = relative_train_sizes
             if len(relative_train_sizes) != len(train_sizes):
                 sizes = train_sizes
 
-            ax.plot(sizes, scores, marker='o', linewidth=2, 
-                   label=model_name.upper(), markersize=8)
+            plt.plot(sizes, scores, marker='o', linewidth=2, 
+                     label=model_name.upper(), markersize=8)
         
-        ax.set_xlabel('% TrainingSet', fontsize=12, fontweight='bold')
-        ax.set_title(f'Learning Curve - {metric_labels[metric]}', fontsize=14, fontweight='bold')
-        ax.legend(fontsize=7)
-        ax.grid(True, alpha=0.3)
-    
-    # Tabella riassuntiva nel quarto subplot
-    ax = axes[3]
-    ax.axis('off')
-    
-    plt.tight_layout()
-    
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_file = f"{output_dir}/learning_curves_{timestamp}.png"
-    plt.savefig(output_file, dpi=300, bbox_inches='tight')
-    print(f"\n{Colors.GREEN}Grafico salvato in: {output_file}{Colors.END}")
-    
-    plt.close()
-
+        plt.xlabel('% TrainingSet', fontsize=12, fontweight='bold')
+        plt.ylabel(metric_labels[metric], fontsize=12, fontweight='bold')
+        plt.title(f'Learning Curve - {metric_labels[metric]}', fontsize=14, fontweight='bold')
+        plt.legend(fontsize=9)
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        
+        output_file = f"{output_dir}/learning_curve_{metric}_{timestamp}.png"
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        print(f"- Grafico {metric_labels[metric]} salvato in: {output_file}")
+        plt.close()
 
 def create_comparison_table(results, output_dir='results'):
     """
