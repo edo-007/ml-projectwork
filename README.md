@@ -12,11 +12,8 @@ Un framework modulare per esperimenti di Machine Learning su task di classificaz
 - [Utilizzo](#utilizzo)
   - [Test di Singoli Modelli](#test-di-singoli-modelli)
   - [Analisi Learning Curves](#analisi-learning-curves)
-- [Modelli Supportati](#modelli-supportati)
 - [Dataset](#dataset)
 - [Output e Risultati](#output-e-risultati)
-- [Utilità](#utilità)
-- [API Python](#api-python)
 
 ---
 
@@ -43,9 +40,6 @@ Il framework è pensato per essere **modulare**, **riproducibile** e **facilment
 - **Split Stratificato**: Mantiene la distribuzione delle classi in train e test set
 - **Riproducibilità**: Seed fissi per garantire risultati riproducibili
 
----
- Stratificato: Mantiene la distribuzione delle classi in train e test set
-Riproducibilità: Seed fissi per garantire risultati riproducibili
 ---
 
 ## Installazione

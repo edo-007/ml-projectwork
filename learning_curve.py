@@ -282,7 +282,7 @@ def plot_learning_curves(results, relative_train_sizes, output_dir='results'):
         
         output_file = f"{output_dir}/learning_curve_{metric}_{timestamp}.png"
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
-        print(f"- Grafico {metric_labels[metric]} salvato in: {output_file}")
+        print(f"Grafico {metric_labels[metric]} salvato in: {output_file}")
         plt.close()
 
 def create_comparison_table(results, output_dir='results'):
