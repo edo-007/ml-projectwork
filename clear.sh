@@ -31,25 +31,26 @@ calculate_size() {
 
 # Calcola dimensione prima della pulizia
 echo -e "\n${YELLOW}Analisi in corso...${NC}"
-size_embeddings=$(calculate_size "embeddings")
-size_results=$(calculate_size "results")
+size_embeddings=$(calculate_size "data/embeddings")
+size_results=$(calculate_size "data/results")
 total_size=$((size_embeddings + size_results))
 
 # Mostra cosa verrà eliminato
-if [ -d "embeddings" ] && [ "$1" != "--ee" ]; then
-    count_embeddings=$(find embeddings -name "*.joblib" -type f 2>/dev/null | wc -l)
+if [ -d "data/embeddings" ] && [ "$1" != "--ee" ]; then
+    count_embeddings=$(find data/embeddings -name "*.joblib" -type f 2>/dev/null | wc -l)
     if [ $count_embeddings -gt 0 ]; then
         echo -e "\n${YELLOW}File in embeddings/:${NC}"
-        find embeddings -name "*.joblib" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
+        find data/embeddings -name "*.joblib" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
     fi
 fi
 
-if [ -d "results" ]; then
-    count_results=$(find results -type f \( -name "*.json" -o -name "*.csv" \)  2>/dev/null | wc -l)
+if [ -d "data/results" ]; then
+    count_results=$(find data/results -type f \( -name "*.json" -o -name "*.csv" -o -name "*.png" \)  2>/dev/null | wc -l)
     if [ $count_results -gt 0 ]; then
         echo -e "\n${YELLOW}File in results/:${NC}"
-        find results -name "*.json" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
-        find results -name "*.csv" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
+        find data/results -name "*.json" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
+        find data/results -name "*.csv" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
+        find data/results -name "*.png" -type f -exec ls -lh {} \; | awk '{print "  - " $9 " (" $5 ")"}'
     fi
 fi
 
@@ -81,15 +82,16 @@ if [[ $confirm == [sS] || $confirm == [sS][iI] ]]; then
     echo -e "\n${YELLOW}Eliminazione in corso...${NC}"
     
     # Elimina file da embeddings/
-    if [ -d "embeddings" ] && [ $count_embeddings -gt 0 ]; then
-        find embeddings -name "*.joblib" -type f -delete
+    if [ -d "data/embeddings" ] && [ $count_embeddings -gt 0 ]; then
+        find data/embeddings -name "*.joblib" -type f -delete
         echo -e "${GREEN}✓ Eliminati $count_embeddings file da embeddings/${NC}"
     fi
     
     # Elimina file da results/
-    if [ -d "results" ] && [ $count_results -gt 0 ]; then
-        find results -name "*.json" -type f -delete
-        find results -name "*.csv" -type f -delete
+    if [ -d "data/results" ] && [ $count_results -gt 0 ]; then
+        find data/results -name "*.json" -type f -delete
+        find data/results -name "*.csv" -type f -delete
+        find data/results -name "*.png" -type f -delete
         echo -e "${GREEN}✓ Eliminati $count_results file da results/${NC}"
     fi
     
